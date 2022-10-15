@@ -3,7 +3,7 @@ const { access_secret, refresh_secret, tokens } = require('../config/config').co
 
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
-const adapter = new FileSync('./db/db.json')
+const adapter = new FileSync('./tmp/db.json')
 
 
 
