@@ -54,8 +54,9 @@ const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('./db/db.json')
 
 const db_init = low(adapter)
-const db_package = low(new FileSync('./package.json'))
 
+const version = '0.0.3.12'
+const proxy = '192.168.0.10'
 
 db_init.defaults(
     {
