@@ -3,7 +3,7 @@ const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('./db/db_test.json')
 const nanoid = require('nanoid').customAlphabet('1234567890', 10);
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { slt } = require('./config/config').config;
 
 const { generateTokens, saveToken, removeToken, refreshThisToken, validateRefreshToken } = require('./service/token');
