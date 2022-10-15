@@ -1,7 +1,7 @@
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 const { getUserData } = require('./userData')
-const adapter = new FileSync('./tmp/db.json')
+const adapter = new FileSync('./db/db.json')
 
 
 const createChatData = ({ userLogin, contactLogin, private }) => {
