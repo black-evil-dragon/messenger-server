@@ -4,6 +4,8 @@ db/*
 messenger.code-workspace.json
 .vscode
 settings.json
+db/db.json
+src/config/config.js
 
 # dependencies
 /node_modules
@@ -27,4 +29,3 @@ settings.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-db/db.json
