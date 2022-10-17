@@ -135,12 +135,7 @@
     }
   ],
   "temp": {
-    "userOnline": [
-      {
-        "userLogin": "blackevildragon",
-        "socketID": "JgIYBNfQto_E9Or1AAAB"
-      }
-    ],
+    "userOnline": [],
     "noticeTemp": []
   }
 }

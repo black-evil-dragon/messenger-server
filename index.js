@@ -3,13 +3,15 @@ console.clear();
 /*   Modules    */
 
 const chalk = require('chalk');
-
 const cookieParser = require('cookie-parser')
+require('dotenv').config()
 
 
 /*  Express */
 
-const port = 8000
+const port = process.env.port || 8000
+const host = process.env.host || '127.0.0.1'
+
 const express = require('express')
 const app = express()
 
@@ -21,11 +23,11 @@ app.use(cookieParser())
 require('./src/routes/routes')(app);
 
 
-
 /*  Server  */
 
 const http = require('http');
 const server = http.createServer(app)
+const version = require('./package.json').version;
 
 
 /*  Socket  */
@@ -55,8 +57,6 @@ const adapter = new FileSync("./db/db.json")
 
 const db_init = low(adapter)
 
-const version = '0.0.3.12'
-const proxy = '192.168.0.10'
 
 db_init.defaults(
     {
@@ -72,12 +72,12 @@ db_init.get('temp').set('userOnline', []).write()
 
 /*   Server     */
 
-console.log(chalk.green('Server started successfully!\n'));
-
-server.listen(port, (error) => {
+server.listen(port, host, (error) => {
     if (error) {
         throw Error(error)
     }
-    console.log(`App listening on port: ${chalk.underline(port)}\nVersion: ${version}\n\n${chalk.bold('  URL:    ')}${proxy}\n`);
+    console.log(chalk.green('Server started successfully!\n'));
+
+    console.log(`App listening on port: ${chalk.underline(port)}\nVersion: ${version}\n\n${chalk.bold('  URL:    ')}${host}\n`);
     console.log('Users socket ID:');
 })
