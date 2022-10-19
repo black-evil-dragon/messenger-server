@@ -16,6 +16,7 @@ module.exports = function (io) {
             io.emit('users:online', tempUser.getActiveUsers())
             tempUser.saveUser({ userLogin: socketUser.userLogin, socketID: socket.id })
 
+            if (!socketUser.userLogin) return socket.disconnect(true)
             console.log(`${socket.id} ${chalk.bold(socketUser.userLogin)} ${chalk.green('connected')}`)
         } else {
             socket.disconnect(true)

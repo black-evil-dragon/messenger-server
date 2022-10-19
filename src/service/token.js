@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const { access_secret, refresh_secret, tokens } = require('../config/config').config
 
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
@@ -8,8 +7,8 @@ const adapter = new FileSync('./db/db.json')
 
 
 const generateTokens = (payload) => {
-    const accessToken = jwt.sign(payload, access_secret, { expiresIn: '1d' })
-    const refreshToken = jwt.sign(payload, refresh_secret, { expiresIn: '7d' })
+    const accessToken = jwt.sign(payload, process.env.access_secret, { expiresIn: '1d' })
+    const refreshToken = jwt.sign(payload, process.env.refresh_secret, { expiresIn: '7d' })
 
     return {
         accessToken,
@@ -39,7 +38,7 @@ const removeToken = (userLogin, refreshToken) => {
 
 const validateAccessToken = (token) => {
     try {
-        const tokenData = jwt.verify(token, access_secret)
+        const tokenData = jwt.verify(token, process.env.access_secret)
         return tokenData
     } catch (error) {
         return null
@@ -48,7 +47,7 @@ const validateAccessToken = (token) => {
 
 const validateRefreshToken = (token) => {
     try {
-        const tokenData = jwt.verify(token, refresh_secret)
+        const tokenData = jwt.verify(token, process.env.refresh_secret)
         return tokenData
     } catch (error) {
         return null

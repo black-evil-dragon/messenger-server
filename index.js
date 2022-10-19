@@ -14,10 +14,17 @@ const host = process.env.host || '127.0.0.1'
 
 const express = require('express')
 const app = express()
+const cors = require('cors')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+app.use(cors({
+    origin: 'http://192.168.0.10:3000',
+    credentials: true
+}))
+
+
 
 /*  Express — Routes  */
 require('./src/routes/routes')(app);
@@ -37,13 +44,7 @@ const io = socket(server, {
     cors: {
         origin: '*',
         credential: true
-    },
-    cookie: {
-        name: "authToken",
-        httpOnly: true,
-        sameSite: "strict",
-        maxAge: 1000 * 60 * 60 * 24
-      }
+    }
 })
 
 require('./src/socket/socket')(io);
@@ -72,12 +73,12 @@ db_init.get('temp').set('userOnline', []).write()
 
 /*   Server     */
 
-server.listen(port, host, (error) => {
+server.listen(port, (error) => {
     if (error) {
         throw Error(error)
     }
     console.log(chalk.green('Server started successfully!\n'));
 
-    console.log(`App listening on port: ${chalk.underline(port)}\nVersion: ${version}\n\n${chalk.bold('  URL:    ')}${host}\n`);
+    console.log(`App listening on port: ${chalk.underline(port)}\nVersion: ${version}\n\n${chalk.bold('  URL:    ')}http://${host + ':' + port}\n`);
     console.log('Users socket ID:');
 })

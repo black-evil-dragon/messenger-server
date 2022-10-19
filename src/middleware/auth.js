@@ -1,5 +1,3 @@
-const jwt = require('jsonwebtoken');
-const { access_secret, refresh_secret, tokens } = require('../config/config').config
 const { validateAccessToken } = require('../service/token')
 
 

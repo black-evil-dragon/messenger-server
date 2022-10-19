@@ -1,10 +1,9 @@
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('./db/db.json')
-const nanoid = require('nanoid').customAlphabet('1234567890', 10);
+const nanoid = require('nanoid').customAlphabet('1234567890', 15);
 
 const bcrypt = require('bcryptjs');
-const { slt } = require('./config/config').config;
 
 const { generateTokens, saveToken, removeToken, refreshThisToken, validateRefreshToken } = require('./service/token');
 const { authMiddleware } = require('./middleware/auth');
@@ -55,6 +54,7 @@ const SignUp = (req, res) => {
     }
 
     const id = nanoid()
+    const slt = parseInt(process.env.slt)
     const hashPassword = bcrypt.hashSync(userPassword, slt)
 
     const userInfo = {

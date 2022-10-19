@@ -4,7 +4,6 @@ const adapter = new FileSync('./db/db.json')
 
 const { nanoid } = require('nanoid')
 
-const { slt } = require('../config/config').config
 const bcrypt = require('bcryptjs');
 
 // Вообще, я решил взять класс только потому, что мне было необходимо понимать, как он работает
