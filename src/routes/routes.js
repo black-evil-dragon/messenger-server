@@ -1,18 +1,6 @@
 const Routes = require('../server');
 
-module.exports = function (app) {/*
-    app.use(function (req, res, next) {
-        if ('OPTIONS' == req.method) {
-            res.header('Access-Control-Allow-Origin', '*');
-            res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-            res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-            res.send(200);
-        }
-        else {
-            next();
-        }
-    });*/
-
+module.exports = function (app) {
     app.get('/', Routes.homePage)
         .get('/users', Routes.getUsers)
 
@@ -27,6 +15,5 @@ module.exports = function (app) {/*
         .post('/api/delete/contact', Routes.deleteContact)
 
         .post('/api/chat/create', Routes.createChat)
-        .post('/api/chat/delete', Routes.createChat)
 }
 

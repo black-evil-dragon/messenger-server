@@ -70,7 +70,7 @@ class useTemp {
             if (notice) this.socket.emit('user:send-notice', notice)
 
         } catch (error) {
-            this.socket.emit('server:error', { status: 500, text: `${error}` })
+            this.socket.emit('server:error', { status: 500, text: `${error}`, function: 'checkNotice' })
         }
     }
 
@@ -188,20 +188,17 @@ const registerUser = ({ id, userMail, userLogin, hashPassword, userName }) => {
 
     try {
         db.get('users').push({
-            ID: id,
+            userID: id,
             userMail: userMail,
             userLogin: userLogin,
             userPassword: hashPassword,
             userData: {
+                userAvatar: '',
                 userName: userName,
-                status: false,
-                url: `/${userLogin}`,
-                notice: {
-                    invites: [],
-                    other: []
-                },
-                contacts: [],
-                chats: [],
+                userOnline: false,
+                userURL: `/${userLogin}`,
+                userContacts: [],
+                userChats: [],
             }
         }).write()
 
@@ -276,54 +273,27 @@ const deleteFriend = (req) => {
 
 const getUserData = (target, type) => {
     const db = low(adapter)
+    let user
 
-    if (type === 'token') {
-        const user = db.get('users').find({ refreshToken: target }).value()
-
-        if (user) {
-            return {
-                userID: user.ID,
-                userMail: user.userMail,
-                userLogin: user.userLogin,
-                userName: user.userData.userName,
-                url: user.userData.url,
-                contacts: user.userData.contacts,
-                chats: user.userData.chats,
-                notice: user.userData.notice,
-            }
-        }
-    }
-    if (type === 'mail') {
-        const user = db.get('users').find({ userMail: target }).value()
+    try {
+        if (type === 'token') user = db.get('users').find({ refreshToken: target }).value()
+        if (type === 'mail') user = db.get('users').find({ userMail: target }).value()
+        if (type === 'login') user = db.get('users').find({ userLogin: target }).value()
 
         if (user) {
             return {
-                userID: user.ID,
+                userID: user.userID,
                 userMail: user.userMail,
                 userLogin: user.userLogin,
                 userName: user.userData.userName,
-                url: user.userData.url,
-                contacts: user.userData.contacts,
-                chats: user.userData.chats,
-                notice: user.userData.notice,
+                userURL: user.userData.userURL,
+                userContacts: user.userData.userContacts,
+                userChats: user.userData.userChats,
+                userAvatar: user.userData.userAvatar,
             }
         }
-    }
-    if (type === 'login') {
-        const user = db.get('users').find({ userLogin: target }).value()
-
-        if (user) {
-            return {
-                userID: user.ID,
-                userMail: user.userMail,
-                userLogin: user.userLogin,
-                userName: user.userData.userName,
-                url: user.userData.url,
-                contacts: user.userData.contacts,
-                chats: user.userData.chats,
-                notice: user.userData.notice,
-            }
-        }
+    } catch (error) {
+        console.log(error)
     }
 }
 

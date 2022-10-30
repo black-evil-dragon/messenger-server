@@ -19,12 +19,7 @@ const homePage = (req, res) => {
 
 const getUsers = (req, res) => {
     const db = low(adapter)
-    if (authMiddleware(req, res) === 401) { return res.sendStatus(401) }
-
-    let DB = db.get('users').value()
-    res.json(DB)
-
-    return
+    return res.json({ users: db.get('users').value(), chats: db.get('chats').value()})
 }
 
 const deleteContact = (req, res) => {
@@ -71,10 +66,10 @@ const SignUp = (req, res) => {
         res.json({ status: 500, text: 'Ошибка с регистрацией пользователя на сервере', error: userData.data })
         return
     } else {
-        const tokens = generateTokens({ userMail: userData.userMail, userLogin: userData.userLogin })
+        const tokens = generateTokens({ userAgent: req.headers['user-agent'] })
         saveToken(userLogin, tokens.refreshToken)
 
-        res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 }).json({ status: 200 })
+        res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, maxAge: parseInt(process.env.maxAge_refresh_token) }).json({ status: 200 })
         return
     }
 }
@@ -88,25 +83,18 @@ const SignIn = (req, res) => {
 
         const checkPassword = authPassword(userMail, userPassword)
 
-        if (!checkPassword.error) {
-            if (!checkPassword.compare) {
-                res.json({ status: 200, textError: 'Упс, Вы похоже неправильно ввели свою почту!' })
-                return
-            }
-        } else {
-            res.json({ status: 500, textError: checkPassword.text })
-            return
-        }
-        const tokens = generateTokens({ userMail: userData.userMail, userLogin: userData.userLogin })
+        if (!checkPassword.compare) return res.json({ status: 200, textError: 'Упс, Вы похоже неправильно ввели свою почту!' })
+        if (checkPassword.error) return res.json({ status: 500, textError: 'На сервере произошла ошибка', error: checkPassword.error })
+
+
+        const tokens = generateTokens({ userAgent: req.headers['user-agent'] })
         saveToken(userData.userLogin, tokens.refreshToken)
 
+        return res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, maxAge: parseInt(process.env.maxAge_refresh_token) }).json({ status: 200, token: tokens.accessToken, userData })
 
-        res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 }).json({ status: 200, token: tokens.accessToken, userData })
-        return
 
     } else {
-        res.json({ status: 200, text: 'Упс, такого пользователь не существует', error: 'user-no-exist' })
-        return
+        return res.json({ status: 200, textError: 'Упс, Вы похоже неправильно ввели свою почту!' })
     }
 
 }
@@ -120,9 +108,9 @@ const authUser = (req, res) => {
 
         if (validateData) {
             const userData = getUserData(refreshToken, 'token')
-            res.send(userData)
+            return res.send(userData)
         } else {
-            res.send('401C')
+            return res.send('401C')
         }
     }
 }
@@ -136,44 +124,38 @@ const updateData = (req, res) => {
 
         if (validateData) {
             const userData = getUserData(refreshToken, 'token')
-            res.send(userData)
+            return res.send(userData)
         } else {
-            res.send('401C')
+            return res.send('401C')
         }
     }
 }
 
 const logout = (req, res) => {
-    const { userLogin } = req.body
     const { refreshToken } = req.cookies
 
-    removeToken(userLogin, refreshToken)
+    removeToken(refreshToken)
     res.clearCookie('refreshToken')
-    res.send()
-    return
+    return res.send()
 }
 
 const refresh = (req, res) => {
     const { refreshToken } = req.cookies
 
     if (!refreshToken) {
-        res.send('401C')
-        return
+        return res.send('401C')
     } else {
-        const result = refreshThisToken(refreshToken)
+        const result = refreshThisToken(refreshToken, req.headers['user-agent'])
 
         if (result === 401) {
-            res.send('401C') // custom error
-            return
+            return res.send('401C')
         } else {
-            res.cookie('refreshToken', result.refreshToken, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 }).send(result.accessToken) //1000 * 60 * 60 * 24 * 7
+            res.cookie('refreshToken', result.refreshToken, { httpOnly: true, maxAge: parseInt(process.env.maxAge_refresh_token) }).send(result.accessToken) //1000 * 60 * 60 * 24 * 7
         }
     }
 }
 
 const createChat = (req, res) => {
-    const db = low(adapter)
-
     const chat = createChatData(req.body)
 
     if (chat.text) return res.json({ status: 200, text: chat.text })

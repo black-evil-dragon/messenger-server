@@ -6,8 +6,8 @@ const adapter = new FileSync('./db/db.json')
 
 
 
-const generateTokens = (payload) => {
-    const accessToken = jwt.sign(payload, process.env.access_secret, { expiresIn: '1d' })
+const generateTokens = payload => {
+    const accessToken = jwt.sign(payload, process.env.access_secret, { expiresIn: '30m' })
     const refreshToken = jwt.sign(payload, process.env.refresh_secret, { expiresIn: '7d' })
 
     return {
@@ -19,24 +19,16 @@ const generateTokens = (payload) => {
 
 const saveToken = (userLogin, refreshToken) => {
     const db = low(adapter)
-
-    const tokenData = db.get('users').find({ refreshToken: refreshToken }).value()
-    if (!tokenData) {
-        db.get('users').find({ userLogin: userLogin }).set('refreshToken', refreshToken).write()
-    }
+    db.get('users').find({ userLogin: userLogin }).set('refreshToken', refreshToken).write()
 }
 
-const removeToken = (userLogin, refreshToken) => {
+const removeToken = (refreshToken) => {
     const db = low(adapter)
-
-    const tokenData = db.get('users').find({ refreshToken: refreshToken }).value()
-    if (tokenData) {
-        db.get('users').find({ userLogin: userLogin }).unset('refreshToken').write()
-    }
+    db.get('users').find({ refreshToken }).unset('refreshToken').write()
 }
 
 
-const validateAccessToken = (token) => {
+const validateAccessToken = token => {
     try {
         const tokenData = jwt.verify(token, process.env.access_secret)
         return tokenData
@@ -45,7 +37,7 @@ const validateAccessToken = (token) => {
     }
 }
 
-const validateRefreshToken = (token) => {
+const validateRefreshToken = token => {
     try {
         const tokenData = jwt.verify(token, process.env.refresh_secret)
         return tokenData
@@ -54,24 +46,18 @@ const validateRefreshToken = (token) => {
     }
 }
 
-const refreshThisToken = (refreshToken) => {
+const refreshThisToken = (refreshToken, userAgent) => {
     const db = low(adapter)
-    if (!refreshToken) {
-        return 401
-    }
 
+    if (!refreshToken) return 401
+
+    const getToken = db.get('users').find({ refreshToken }).value()
     const tokenData = validateRefreshToken(refreshToken)
-    const getToken = db.get('users').find({ refreshToken: refreshToken }).value()
 
-    if (!tokenData || !getToken) {
-        return 401
-    }
-    const user_data = {
-        userLogin: getToken.userLogin,
-    }
+    if (!tokenData || !getToken) return 401
 
-    const tokens = generateTokens(user_data)
-    saveToken(user_data.userLogin, tokens.refreshToken)
+    const tokens = generateTokens({ userAgent })
+    saveToken(getToken.userLogin, tokens.refreshToken)
 
     return tokens
 }

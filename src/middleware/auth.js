@@ -2,7 +2,6 @@ const { validateAccessToken } = require('../service/token')
 
 
 const authMiddleware = req => {
-
     const authHeader = req.headers.authorization
     if (!authHeader) return 401
 
@@ -11,8 +10,8 @@ const authMiddleware = req => {
 
     const tokenData = validateAccessToken(accessToken)
     if (!tokenData) return 401
+    if (tokenData.userAgent !== req.headers['user-agent']) return 401
 
-    req.user = tokenData
     return req
 }
 
